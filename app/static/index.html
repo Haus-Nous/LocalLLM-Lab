@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local AI Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-brain logo-icon"></i>
+                <h2>LocalLLM-Lab</h2>
+            </div>
+            
+            <div class="settings">
+                <div class="setting-group">
+                    <label for="model-select">Model configuration</label>
+                    <select id="model-select">
+                        <option value="llama3.2:3b">llama3.2 (3B)</option>
+                        <option value="mistral:7b">mistral (7B)</option>
+                        <option value="phi3:mini">phi-3 (Mini)</option>
+                        <option value="llama3.1:8b">llama3.1 (8B)</option>
+                        <option value="deepseek-r1:8b">deepseek-r1 (8B)</option>
+                    </select>
+                </div>
+
+                <div class="setting-group">
+                    <label for="temp-slider">Temperature: <span id="temp-val">0.7</span></label>
+                    <input type="range" id="temp-slider" min="0" max="1" step="0.1" value="0.7">
+                </div>
+            </div>
+            
+            <button id="new-chat-btn" class="secondary-btn"><i class="fas fa-plus"></i> New Conversation</button>
+            <div class="sidebar-footer">
+                <div class="status-indicator online"></div>
+                <span>Offline Inference Array</span>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-container">
+            <header class="chat-header">
+                <h3 id="current-chat-title">Chatting with <span id="header-model-name">llama3.2:3b</span></h3>
+            </header>
+            
+            <div class="chat-messages" id="chat-messages">
+                <div class="message system-msg">
+                    <div class="avatar"><i class="fas fa-robot"></i></div>
+                    <div class="message-content">
+                        <p>Hello! I am your Local AI Assistant.</p>
+                        <p>All your prompts are processed directly on this machine via Ollama. No data is sent to the cloud.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <form id="chat-form">
+                    <textarea id="prompt-input" placeholder="Message the AI..." rows="1"></textarea>
+                    <button type="submit" id="send-btn" disabled><i class="fas fa-arrow-up"></i></button>
+                </form>
+                <div class="input-footer">AI can make mistakes. Local inference guarantees absolute privacy.</div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>
