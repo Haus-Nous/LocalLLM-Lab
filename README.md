@@ -14,8 +14,133 @@ Designed for AI engineers, hiring managers, and systems architects, LocalLLM-Lab
 
 ## 🏛️ System Architecture
 
-LocalLLM-Lab abstracts local inference execution, output validation, and profiling into a unified workflow. Below is the system flow for a structured chat request:
+LocalLLM-Lab abstracts local inference execution, output validation, and profiling into a unified workflow. Below are the architectural topology and sequence request flow designs:
 
+### 1. System Component Topology
+```mermaid
+graph TB
+    %% Core Nodes & Blocks
+    subgraph UI_Layer ["🖥️ User Interface (Glassmorphic SPA)"]
+        UI["Web UI Dashboard <br/> (Vanilla JS / Marked / Styles.css)"]
+        CLI["CLI Interface <br/> (assistant.py --model --prompt)"]
+    end
+
+    subgraph Backend_Server ["⚡ Asynchronous Backend Gateway"]
+        API["FastAPI Web Server <br/> (app/api.py)"]
+        Router["/chat Router <br/> (POST Endpoint)"]
+    end
+
+    subgraph Prompt_Orchestrator ["🧠 Prompt Engineering Layer"]
+        SysPrompt["System Prompt Enforcement <br/> (Strict Schema Constraint)"]
+        PromptCompiler["Dynamic Prompt Compiler <br/> (app/llm_client.py)"]
+    end
+
+    subgraph Verification_Pipeline ["🛡️ Resilient JSON Validation Layer"]
+        PydanticParser["Pydantic v2 Parser <br/> (ChatResponse Validation)"]
+        StrictJSON["Strict JSON Guard <br/> (format='json')"]
+    end
+
+    subgraph Recovery_Mechanism ["🔄 Auto-Correction & Retry Engine"]
+        RetryLoop["Feedback Repair Loop <br/> (Auto-Inception Retry)"]
+        ErrorTrace["Traceback Formatter <br/> (ValidationError Serializer)"]
+    end
+
+    subgraph Local_Runtime ["🐳 Local Inference Platform"]
+        OllamaDaemon["Ollama Daemon <br/> (HTTP AsyncClient Client API)"]
+    end
+
+    subgraph Model_Registry ["📦 Small Language Models (SLMs)"]
+        direction LR
+        L32["Llama 3.2 (3B)"]
+        L31["Llama 3.1 (8B)"]
+        Mistral["Mistral (7B)"]
+        Phi3["Phi-3 (Mini 3.8B)"]
+        DeepSeek["DeepSeek-R1 (8B Distilled)"]
+    end
+
+    subgraph Benchmarking_Engine ["📊 Stream-Based Metrics Harvester"]
+        direction TB
+        BM_Suite["Inference Profiler <br/> (benchmarks/benchmark.py)"]
+        TTFT["Time-To-First-Token (TTFT)"]
+        TPS["Tokens-Per-Second (TPS)"]
+        Latency["Total Request Latency"]
+        RSS["Ollama RSS Memory Delta (psutil)"]
+    end
+
+    subgraph Evaluation_Suite ["🔬 Qualitative Evaluation Harness"]
+        direction TB
+        Eval_Controller["Eval Controller <br/> (evaluation/compare.py)"]
+        Prompt_Dataset["Dataset Curation <br/> (40 Prompts / 5 Categories)"]
+        Quality_Matrix["Response Quality Analysis"]
+        Accuracy_Gate["Structured Output Accuracy"]
+        Reliability_Gate["Operational Reliability Scale"]
+    end
+
+    %% Process Connections
+    UI --> API
+    CLI --> PromptCompiler
+    API --> Router
+    Router --> PromptCompiler
+    
+    PromptCompiler --> SysPrompt
+    SysPrompt --> StrictJSON
+    StrictJSON --> OllamaDaemon
+    
+    OllamaDaemon --> PydanticParser
+    
+    PydanticParser -- "Validation Success (HTTP 200)" --> ClientOutput["Client Output"]
+    PydanticParser -- "Validation Fail" --> ErrorTrace
+    
+    ErrorTrace --> RetryLoop
+    RetryLoop -- "Recalibrated Query" --> PromptCompiler
+    
+    OllamaDaemon --> L32
+    OllamaDaemon --> L31
+    OllamaDaemon --> Mistral
+    OllamaDaemon --> Phi3
+    OllamaDaemon --> DeepSeek
+
+    %% Parallel Harvester Triggers
+    OllamaDaemon -. "Streams Chunks" .-> BM_Suite
+    BM_Suite --> TTFT
+    BM_Suite --> TPS
+    BM_Suite --> Latency
+    BM_Suite --> RSS
+    
+    L32 -. "Generates Outputs" .-> Eval_Controller
+    L31 -. "Generates Outputs" .-> Eval_Controller
+    Mistral -. "Generates Outputs" .-> Eval_Controller
+    Phi3 -. "Generates Outputs" .-> Eval_Controller
+    DeepSeek -. "Generates Outputs" .-> Eval_Controller
+    
+    Eval_Controller --> Prompt_Dataset
+    Eval_Controller --> Quality_Matrix
+    Eval_Controller --> Accuracy_Gate
+    Eval_Controller --> Reliability_Gate
+
+    %% Styles & Color Mappings
+    classDef uiStyle fill:#4F46E5,stroke:#312E81,stroke-width:2px,color:#FFFFFF;
+    classDef backendStyle fill:#0891B2,stroke:#083344,stroke-width:2px,color:#FFFFFF;
+    classDef promptStyle fill:#0D9488,stroke:#115E59,stroke-width:2px,color:#FFFFFF;
+    classDef validatorStyle fill:#EA580C,stroke:#7C2D12,stroke-width:2px,color:#FFFFFF;
+    classDef retryStyle fill:#B91C1C,stroke:#7F1D1D,stroke-width:2px,color:#FFFFFF;
+    classDef runtimeStyle fill:#1E293B,stroke:#0F172A,stroke-width:2px,color:#FFFFFF;
+    classDef modelStyle fill:#6D28D9,stroke:#4C1D95,stroke-width:2px,color:#FFFFFF;
+    classDef benchStyle fill:#0284C7,stroke:#0C4A6E,stroke-width:2px,color:#FFFFFF;
+    classDef evalStyle fill:#DB2777,stroke:#831843,stroke-width:2px,color:#FFFFFF;
+
+    class UI,CLI uiStyle;
+    class API,Router,ClientOutput backendStyle;
+    class SysPrompt,PromptCompiler promptStyle;
+    class PydanticParser,StrictJSON validatorStyle;
+    class RetryLoop,ErrorTrace retryStyle;
+    class OllamaDaemon runtimeStyle;
+    class L32,L31,Mistral,Phi3,DeepSeek modelStyle;
+    class BM_Suite,TTFT,TPS,Latency,RSS benchStyle;
+    class Eval_Controller,Prompt_Dataset,Quality_Matrix,Accuracy_Gate,Reliability_Gate evalStyle;
+```
+
+### 2. Request Lifecycle Sequence
 ```mermaid
 sequenceDiagram
     autonumber
@@ -43,10 +168,6 @@ sequenceDiagram
         end
     end
 ```
-
-### System Architecture Layout Diagram
-![System Architecture Diagram](https://raw.githubusercontent.com/Haus-Nous/LocalLLM-Lab/main/assets/architecture_placeholder.png)
-*(Placeholder: To replace with actual architecture schematic diagram showing the client frontend, backend API server, local SQLite/CSV logging layers, and the Ollama model execution engine)*
 
 ---
 
